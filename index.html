@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eter Agent Ecosystem</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --g: #00FF41;
+    --g2: #39FF14;
+    --g3: #00cc33;
+    --g4: #007a1f;
+    --g5: #003B00;
+    --bg: #000;
+    --bg2: #020a02;
+    --red: #FF0000;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Share Tech Mono', monospace;
+    background: var(--bg);
+    color: var(--g);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  #rain { position: fixed; inset: 0; opacity: 0.06; z-index: 0; pointer-events: none; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .wrap { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 0 28px; }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--g5);
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(4px);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+  .nav-id {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--g);
+  }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--g4);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--g); }
+  .hero { padding: 140px 0 80px; }
+  .hero-sys { font-size: 11px; color: var(--g4); letter-spacing: 4px; margin-bottom: 20px; }
+  .hero-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: 2px;
+    color: var(--g);
+    text-shadow: 0 0 60px rgba(0,255,65,0.3);
+    margin-bottom: 8px;
+    animation: glitch 10s infinite;
+  }
+  .hero-sub {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-weight: 400;
+    color: var(--g4);
+    letter-spacing: 3px;
+    margin-bottom: 32px;
+  }
+  .hero-desc {
+    font-size: 14px;
+    color: var(--g3);
+    max-width: 600px;
+    line-height: 2;
+    margin-bottom: 48px;
+    border-left: 2px solid var(--g5);
+    padding-left: 20px;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .cta-primary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    border: 1px solid var(--g);
+    color: #000;
+    background: var(--g);
+    padding: 12px 28px;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .cta-primary:hover { background: var(--g2); border-color: var(--g2); }
+  .cta-secondary {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    border: 1px solid var(--g5);
+    color: var(--g4);
+    padding: 12px 28px;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .cta-secondary:hover { border-color: var(--g); color: var(--g); }
+  .install-block {
+    margin: 64px 0;
+    border: 1px solid var(--g5);
+    background: var(--bg2);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .install-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--g), transparent);
+  }
+  .install-label { font-size: 10px; color: var(--g4); letter-spacing: 3px; margin-bottom: 16px; }
+  .install-step { display: flex; gap: 12px; margin-bottom: 8px; align-items: flex-start; }
+  .install-n { font-size: 11px; color: var(--g5); width: 20px; flex-shrink: 0; margin-top: 2px; }
+  .install-cmd {
+    font-size: 13px;
+    color: var(--g);
+    background: none;
+    border: none;
+    font-family: 'Share Tech Mono', monospace;
+    flex: 1;
+    word-break: break-all;
+  }
+  .install-comment { font-size: 11px; color: var(--g5); margin-top: 2px; }
+  .div { display: flex; align-items: center; gap: 16px; margin: 64px 0 32px; }
+  .div span { font-size: 11px; color: var(--g4); letter-spacing: 4px; white-space: nowrap; }
+  .div::before, .div::after { content: ''; flex: 1; height: 1px; background: var(--g5); }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--g5); margin-bottom: 64px; }
+  .feat {
+    background: var(--bg);
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+  }
+  .feat:hover { background: var(--bg2); }
+  .feat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 0;
+    background: var(--g);
+    transition: height 0.3s;
+  }
+  .feat:hover::before { height: 100%; }
+  .feat-icon { font-size: 11px; color: var(--g4); letter-spacing: 3px; margin-bottom: 10px; }
+  .feat-title { font-size: 14px; color: var(--g); margin-bottom: 10px; line-height: 1.3; }
+  .feat-desc { font-size: 12px; color: var(--g4); line-height: 1.8; }
+  .arch {
+    border: 1px solid var(--g5);
+    background: var(--bg2);
+    padding: 32px;
+    margin-bottom: 64px;
+    font-size: 12px;
+    line-height: 2;
+    overflow-x: auto;
+  }
+  .arch-tier { color: var(--g4); letter-spacing: 2px; font-size: 10px; margin-bottom: 6px; margin-top: 18px; }
+  .arch-tier:first-child { margin-top: 0; }
+  .arch-agent { color: var(--g); }
+  .arch-role { color: var(--g4); }
+  .arch-arrow { color: var(--g5); }
+  .arch-line { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 64px; }
+  .agent-card {
+    border: 1px solid var(--g5);
+    background: var(--bg2);
+    padding: 24px 20px;
+    position: relative;
+  }
+  .agent-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--g), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .agent-card:hover::after { opacity: 1; }
+  .agent-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--g);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .agent-role { font-size: 10px; color: var(--g4); letter-spacing: 3px; margin-bottom: 12px; }
+  .agent-caps { list-style: none; }
+  .agent-caps li { font-size: 11px; color: var(--g3); margin-bottom: 4px; }
+  .agent-caps li::before { content: '→ '; color: var(--g5); }
+  .ipc {
+    border: 1px solid var(--g5);
+    background: var(--bg2);
+    padding: 32px;
+    margin-bottom: 64px;
+  }
+  .ipc-flow {
+    font-size: 12px;
+    line-height: 2.2;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .ipc-op { color: var(--g); }
+  .ipc-sep { color: var(--g5); }
+  .ipc-desc { color: var(--g4); }
+  footer { border-top: 1px solid var(--g5); padding: 48px 0 64px; }
+  footer .wrap { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .footer-id {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: var(--g);
+    margin-bottom: 8px;
+  }
+  .footer-made { font-size: 11px; color: var(--g5); letter-spacing: 2px; }
+  .footer-links { display: flex; flex-direction: column; gap: 10px; }
+  .footer-links a {
+    font-size: 11px;
+    color: var(--g4);
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--g); }
+  @keyframes glitch {
+    0%, 88%, 100% { text-shadow: 0 0 60px rgba(0,255,65,0.3); transform: none; }
+    90% { transform: translate(-2px,0); text-shadow: 2px 0 rgba(255,0,0,0.5), -2px 0 var(--g); }
+    92% { transform: translate(2px,0); text-shadow: -2px 0 rgba(255,0,0,0.5), 2px 0 var(--g); }
+    94% { transform: none; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 110px 0 60px; }
+    .arch { font-size: 11px; }
+    .ipc-flow { font-size: 11px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+
+<nav>
+  <div class="wrap">
+    <span class="nav-id">ETER</span>
+    <div class="nav-links">
+      <a href="#agents">AGENTS</a>
+      <a href="#ipc">IPC</a>
+      <a href="https://github.com/DarkArty07/Eter-Agent-Ecosystem" target="_blank">GITHUB ↗</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-sys">// ETER AGENT ECOSYSTEM v5.0</div>
+    <h1 class="hero-name">Multi-Agent<br>Infrastructure.</h1>
+    <div class="hero-sub">Built on Hermes Agent · Python · tmux</div>
+    <p class="hero-desc">
+      Four persistent agents. One orchestration layer. Async IPC via JSON inbox with atomic writes.<br>
+      Not a chatbot wrapper — a real agentic system that delegates, coordinates, and remembers.
+    </p>
+    <div class="hero-ctas">
+      <a class="cta-primary" href="https://github.com/DarkArty07/Eter-Agent-Ecosystem" target="_blank">→ VIEW ON GITHUB</a>
+      <a class="cta-secondary" href="#agents">MEET THE AGENTS</a>
+    </div>
+    <div class="install-block">
+      <div class="install-label">// QUICK START</div>
+      <div class="install-step">
+        <span class="install-n">1.</span>
+        <div>
+          <div class="install-cmd">git clone https://github.com/DarkArty07/Eter-Agent-Ecosystem.git ~/.hermes</div>
+          <div class="install-comment"># installs into hermes agent home</div>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="install-n">2.</span>
+        <div>
+          <div class="install-cmd">cp shared/env.base.example shared/env.base && ./scripts/setup-env.sh</div>
+          <div class="install-comment"># configure api keys, generate .env per profile</div>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="install-n">3.</span>
+        <div>
+          <div class="install-cmd">hermes -p hermes</div>
+          <div class="install-comment"># boot the orchestrator</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="div"><span>// WHAT IT DOES</span></div>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-icon">ASYNC IPC</div>
+        <div class="feat-title">Zero-thread inter-agent communication</div>
+        <div class="feat-desc">Agora v5 — atomic JSON inbox writes. No FIFOs, no race conditions. Debuggable with <code>cat inbox/agent.json</code>.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">HIERARCHY</div>
+        <div class="feat-title">Three-tier agent architecture</div>
+        <div class="feat-desc">Archon → Daimon → Ergates. Persistent specialists with SOUL.md identity. Stateless workers on demand.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">MEMORY</div>
+        <div class="feat-title">Cross-session state via .eter/</div>
+        <div class="feat-desc">Every project carries its own <code>.eter/</code> directory. Agents pick up exactly where they left off.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">TMUX</div>
+        <div class="feat-title">Self-managed agent processes</div>
+        <div class="feat-desc">Agora auto-spawns agents in isolated tmux windows. Real-time pane capture for progress visibility.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">PARALLEL</div>
+        <div class="feat-title">Concurrent task delegation</div>
+        <div class="feat-desc">Hermes talks to multiple agents simultaneously. Hefesto spawns parallel sub-agents via <code>delegate_task</code>.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">PORTABLE</div>
+        <div class="feat-title">No symlinks, no hardcoded paths</div>
+        <div class="feat-desc">HERMES_HOME-aware path resolution. Shared API keys + per-profile overrides. Git-friendly by design.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="agents">
+  <div class="wrap">
+    <div class="div"><span>// AGENTS</span></div>
+    <div class="agents">
+      <div class="agent-card">
+        <div class="agent-name">HERMES</div>
+        <div class="agent-role">ARCHON · ORCHESTRATOR</div>
+        <ul class="agent-caps">
+          <li>System design</li>
+          <li>Task orchestration</li>
+          <li>Agent delegation</li>
+          <li>Architecture planning</li>
+        </ul>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">ARIADNA</div>
+        <div class="agent-role">DAIMON · PROJECT MANAGER</div>
+        <ul class="agent-caps">
+          <li>Cross-session memory</li>
+          <li>Project state tracking</li>
+          <li>Session audit</li>
+          <li>Blocker tracking</li>
+        </ul>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">HEFESTO</div>
+        <div class="agent-role">DAIMON · TECH ORCHESTRATOR</div>
+        <ul class="agent-caps">
+          <li>Task decomposition</li>
+          <li>Parallel execution</li>
+          <li>delegate_task coord.</li>
+          <li>Code review</li>
+        </ul>
+      </div>
+      <div class="agent-card">
+        <div class="agent-name">ETALIDES</div>
+        <div class="agent-role">DAIMON · RESEARCHER</div>
+        <ul class="agent-caps">
+          <li>Web research</li>
+          <li>Knowledge preservation</li>
+          <li>Obsidian vault</li>
+          <li>Source citation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="arch">
+      <div class="arch-tier">// COMMUNICATION FLOW</div>
+      <div class="arch-line"><span class="arch-agent">User</span> <span class="arch-arrow">──talk_to──▶</span> <span class="arch-agent">Hermes</span> <span class="arch-arrow">──talk_to──▶</span> <span class="arch-agent">Ariadna</span> <span class="arch-role">(state queries)</span></div>
+      <div class="arch-line" style="padding-left:160px"><span class="arch-arrow">──talk_to──▶</span> <span class="arch-agent">Hefesto</span> <span class="arch-role">(implementation)</span></div>
+      <div class="arch-line" style="padding-left:160px"><span class="arch-arrow">──talk_to──▶</span> <span class="arch-agent">Etalides</span> <span class="arch-role">(research)</span></div>
+      <div class="arch-line" style="margin-top:8px"><span class="arch-agent">Hefesto</span> <span class="arch-arrow">──delegate_task──▶</span> <span class="arch-agent">implementer / reviewer / researcher</span> <span class="arch-role">(parallel)</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="ipc">
+  <div class="wrap">
+    <div class="div"><span>// AGORA IPC v5</span></div>
+    <div class="ipc">
+      <div class="ipc-flow">
+<span class="ipc-op">talk_to</span><span class="ipc-sep">(</span>agent<span class="ipc-sep">="</span><span style="color:#00cc33">ariadna</span><span class="ipc-sep">",</span> action<span class="ipc-sep">="</span><span class="ipc-op">open</span><span class="ipc-sep">") </span><span class="ipc-desc">→ session_id</span>
+<span class="ipc-op">talk_to</span><span class="ipc-sep">(</span>action<span class="ipc-sep">="</span><span class="ipc-op">message</span><span class="ipc-sep">",</span> prompt<span class="ipc-sep">="</span><span class="ipc-desc">...</span><span class="ipc-sep">") </span><span class="ipc-desc">→ returns immediately</span>
+<span class="ipc-sep">                              </span><span class="ipc-desc">// agent works in background</span>
+<span class="ipc-op">talk_to</span><span class="ipc-sep">(</span>action<span class="ipc-sep">="</span><span class="ipc-op">poll</span><span class="ipc-sep">") </span><span class="ipc-desc">→ { status: "working", activity: "..." }</span>
+<span class="ipc-op">talk_to</span><span class="ipc-sep">(</span>action<span class="ipc-sep">="</span><span class="ipc-op">wait</span><span class="ipc-sep">",</span> timeout<span class="ipc-sep">=</span>120<span class="ipc-sep">) </span><span class="ipc-desc">→ { status: "done", response: "..." }</span>
+<span class="ipc-op">talk_to</span><span class="ipc-sep">(</span>action<span class="ipc-sep">="</span><span class="ipc-op">close</span><span class="ipc-sep">") </span><span class="ipc-desc">→ { status: "closed" }</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="footer-id">DARKART Y07</div>
+      <div class="footer-made">// BUILT IN MEXICO CITY · 2026</div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/DarkArty07/Eter-Agent-Ecosystem" target="_blank">→ GitHub Repository</a>
+      <a href="https://github.com/NousResearch/hermes-agent" target="_blank">→ Built on Hermes Agent</a>
+      <a href="https://github.com/DarkArty07" target="_blank">→ DarkArty07 Profile</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const canvas = document.getElementById('rain');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+const cols = Math.floor(window.innerWidth / 18);
+const drops = Array.from({length: cols}, () => Math.random() * -50);
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>{}[]';
+function draw() {
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00FF41';
+  ctx.font = '14px Share Tech Mono';
+  for (let i = 0; i < drops.length; i++) {
+    const c = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(c, i * 18, drops[i] * 18);
+    if (drops[i] * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i] += 0.7;
+  }
+}
+setInterval(draw, 60);
+</script>
+</body>
+</html>
